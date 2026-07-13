@@ -89,6 +89,7 @@ def get_complaints():
         'confidence': f"{c.confidence * 100:.1f}%"
     } for c in complaints]
     return jsonify(data)
-
 if __name__ == '__main__':
-    app.run(debug=True)
+    # إضافة هذا السطر يجعل السيرفر يعمل بشكل صحيح على بيئات الاستضافة
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
