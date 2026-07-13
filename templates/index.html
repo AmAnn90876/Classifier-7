@@ -37,6 +37,24 @@
         .stat-card h3 { margin: 0 0 8px 0; color: #7f8c8d; font-size: 14px; }
         .stat-card p { margin: 0; font-size: 28px; font-weight: bold; color: #2c3e50; }
 
+        /* تصميم الدوائر الزمنية التفاعلية */
+        .time-circles-container { display: flex; justify-content: space-around; gap: 15px; margin: 25px 0; flex-wrap: wrap; }
+        .time-circle-box { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; flex: 1; min-width: 130px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; }
+        .time-circle-box h4 { margin: 0 0 10px 0; color: #34495e; font-size: 15px; }
+        
+        .progress-ring-wrapper { position: relative; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
+        .progress-ring-text { position: absolute; font-size: 20px; font-weight: bold; color: #2c3e50; }
+        
+        /* تصميم الدائرة بـ SVG لضمان مرونة الحركة والدقة */
+        .progress-ring { transform: rotate(-90deg); transform-origin: 50% 50%; }
+        .progress-ring__circle-bg { fill: transparent; stroke: #e6e9ed; stroke-width: 8; }
+        .progress-ring__circle { fill: transparent; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.35s; }
+        
+        /* تلوين مسارات الحركة لكل دائرة زمنية */
+        .circle-day { stroke: #e74c3c; }
+        .circle-week { stroke: #f1c40f; }
+        .circle-month { stroke: #2ecc71; }
+
         .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px; }
         @media (max-width: 900px) {
             .dashboard-grid { grid-template-columns: 1fr; }
@@ -55,7 +73,7 @@
     </div>
 </div>
 
-<!-- البطاقة البيضاء الرئيسية والمدمج بداخلها الـ Dashboard مباشرة -->
+<!-- البطاقة البيضاء الرئيسية وبها الـ Dashboard المطور والمحمي للخصوصية -->
 <div id="home" class="page active">
     <h1 style="margin-top: 0; color: #2c3e50;">نظام تصنيف البلاغات الذكي</h1>
     <p style="color: #7f8c8d; margin-bottom: 25px;">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
@@ -65,7 +83,7 @@
         <h2 style="color: #2c3e50; font-size: 22px; margin-bottom: 5px;">📊 لوحة مراقبة البلاغات وتحليل البيانات الحية</h2>
         <p style="color: #95a5a6; margin: 0 0 20px 0; font-size: 14px;">إحصائيات فورية ومباشرة للبلاغات الواردة للنظام.</p>
 
-        <!-- كروت الإحصائيات السريعة -->
+        <!-- كروت الإحصائيات السريعة العامة -->
         <div class="stats-container">
             <div class="stat-card total">
                 <h3>إجمالي البلاغات المسجلة</h3>
@@ -77,23 +95,60 @@
             </div>
         </div>
 
+        <!-- دوائر الفلاتر الزمنية الثلاث (اليوم، الأسبوع، الشهر) -->
+        <div class="time-circles-container">
+            <!-- دائرة إحصائيات اليوم -->
+            <div class="time-circle-box">
+                <h4>بلاغات اليوم</h4>
+                <div class="progress-ring-wrapper">
+                    <svg class="progress-ring" width="90" height="90">
+                        <circle class="progress-ring__circle-bg" r="38" cx="45" cy="45"/>
+                        <circle id="circleDay" class="progress-ring__circle circle-day" r="38" cx="45" cy="45" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+                    </svg>
+                    <span id="textDay" class="progress-ring-text">0</span>
+                </div>
+            </div>
+
+            <!-- دائرة إحصائيات الأسبوع -->
+            <div class="time-circle-box">
+                <h4>بلاغات الأسبوع</h4>
+                <div class="progress-ring-wrapper">
+                    <svg class="progress-ring" width="90" height="90">
+                        <circle class="progress-ring__circle-bg" r="38" cx="45" cy="45"/>
+                        <circle id="circleWeek" class="progress-ring__circle circle-week" r="38" cx="45" cy="45" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+                    </svg>
+                    <span id="textWeek" class="progress-ring-text">0</span>
+                </div>
+            </div>
+
+            <!-- دائرة إحصائيات الشهر -->
+            <div class="time-circle-box">
+                <h4>بلاغات الشهر</h4>
+                <div class="progress-ring-wrapper">
+                    <svg class="progress-ring" width="90" height="90">
+                        <circle class="progress-ring__circle-bg" r="38" cx="45" cy="45"/>
+                        <circle id="circleMonth" class="progress-ring__circle circle-month" r="38" cx="45" cy="45" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+                    </svg>
+                    <span id="textMonth" class="progress-ring-text">0</span>
+                </div>
+            </div>
+        </div>
+
         <div class="dashboard-grid">
-            <!-- جدول البلاغات الأخيرة -->
+            <!-- جدول البلاغات الأخيرة مع إخفاء حقول الخصوصية تماماً -->
             <div style="overflow-x: auto;">
                 <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">📋 البلاغات الأخيرة المسجلة</h3>
                 <table>
                     <thead>
                         <tr>
                             <th>التاريخ والوقت</th>
-                            <th>مقدم البلاغ</th>
-                            <th>رقم الجوال</th>
-                            <th>تفاصيل البلاغ</th>
+                            <th>تفاصيل البلاغ الوارد</th>
                             <th>التصنيف التلقائي</th>
                         </tr>
                     </thead>
                     <tbody id="adminLogsBody">
                         <tr>
-                            <td colspan="5" style="text-align: center; color: #95a5a6; padding: 30px 10px;">لا توجد بلاغات مسجلة حتى الآن في السحابة.</td>
+                            <td colspan="3" style="text-align: center; color: #95a5a6; padding: 30px 10px;">لا توجد بلاغات مسجلة حتى الآن في السحابة.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -155,7 +210,7 @@
     // استدعاء جلب وتحديث الإحصائيات العامة فور تحميل الصفحة بنجاح
     window.onload = function() {
         initDefaultChart(); // رسم مخطط بياني افتراضي فارغ لضمان الظهور الفوري
-        loadDashboardStats(); // محاولة جلب الإحصائيات الحقيقية من السيرفر
+        loadDashboardStats(); // جلب الإحصائيات الحقيقية وتحديث الدوائر التفاعلية
     };
 
     function showPage(pageId) {
@@ -164,6 +219,21 @@
         if (pageId === 'home') {
             loadDashboardStats();
         }
+    }
+
+    // دالة للتحكم في تعبئة الدوائر التفاعلية بناءً على النسبة المئوية للبلاغات
+    function setCircleProgress(circleId, count, maxPossibleCount) {
+        const circle = document.getElementById(circleId);
+        const radius = circle.r.baseVal.value;
+        const circumference = 2 * Math.PI * radius; // 238.76 تقريباً
+        
+        // حساب النسبة المئوية للتعبئة
+        let percent = maxPossibleCount > 0 ? (count / maxPossibleCount) * 100 : 0;
+        if (percent > 100) percent = 100; // سقف تعبئة الدائرة 100%
+        
+        const offset = circumference - (percent / 100) * circumference;
+        circle.style.strokeDasharray = `${circumference} ${circumference}`;
+        circle.style.strokeDashoffset = offset;
     }
 
     // رسم بياني مبدئي لضمان عدم بقاء المخطط فارغاً
@@ -188,7 +258,7 @@
         });
     }
 
-    // جلب الإحصائيات العامة وتحديث الـ Dashboard
+    // جلب الإحصائيات العامة وتحديث الـ Dashboard والدوائر
     async function loadDashboardStats() {
         try {
             const response = await fetch('/api/dashboard-stats');
@@ -196,26 +266,39 @@
             
             if (data.error) return;
 
-            // تحديث العدد الإجمالي
+            // تحديث العدد الإجمالي بالعداد
             document.getElementById('count').innerText = data.total_reports || 0;
             document.getElementById('statTotal').innerText = data.total_reports || 0;
             
-            // تعبئة الجدول الرئيسي بالبيانات السحابية
+            // تعبئة جدول البلاغات مع المحافظة التامة على الخصوصية (إخفاء الاسم والرقم)
             const adminBody = document.getElementById('adminLogsBody');
             adminBody.innerHTML = '';
             if (!data.recent_reports || data.recent_reports.length === 0) {
-                adminBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #95a5a6; padding: 30px 10px;">لا توجد بلاغات مسجلة حتى الآن في السحابة.</td></tr>';
+                adminBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #95a5a6; padding: 30px 10px;">لا توجد بلاغات مسجلة حتى الآن في السحابة.</td></tr>';
             } else {
                 data.recent_reports.forEach(r => {
                     adminBody.innerHTML += `<tr>
                         <td>${r.timestamp}</td>
-                        <td>${r.name}</td>
-                        <td>${r.phone}</td>
                         <td>${r.text}</td>
                         <td><span class="tag-cat">${r.category}</span></td>
                     </tr>`;
                 });
             }
+
+            // تحديث الدوائر الزمنية التفاعلية
+            // سنفترض أن السيرفر يعيد الحساب الزمني أو سنستخلص الأعداد ديناميكياً من المجموع الإجمالي للعرض
+            const dayCount = data.reports_today || 0;
+            const weekCount = data.reports_this_week || 0;
+            const monthCount = data.reports_this_month || 0;
+
+            document.getElementById('textDay').innerText = dayCount;
+            document.getElementById('textWeek').innerText = weekCount;
+            document.getElementById('textMonth').innerText = monthCount;
+
+            // تحديث نسبة التعبئة الرسومية للدوائر (تنسب إلى سقف أقصى افتراضي وهو 20 بلاغاً كمعيار تفاعلي)
+            setCircleProgress('circleDay', dayCount, 10); 
+            setCircleProgress('circleWeek', weekCount, 25);
+            setCircleProgress('circleMonth', monthCount, 50);
 
             // تحديد وتحديث القسم الأكثر شيوعاً بالبلاغات
             const cats = data.category_distribution || {};
