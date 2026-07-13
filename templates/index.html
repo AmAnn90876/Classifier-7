@@ -1,140 +1,279 @@
 <!DOCTYPE html>
+
 <html lang="ar" dir="rtl" id="htmlTag">
+
 <head>
+
     <meta charset="UTF-8">
+
     <title data-i18n="title">نظام تصنيف البلاغات الذكي</title>
+
     <style>
+
         :root { --bg: #f4f7f6; --card-bg: white; --text: #333; --nav: #2c3e50; }
+
         .dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #eee; --nav: #000; }
+
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; }
+
         .nav-bar { background: var(--nav); color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+
         .page { display: none; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
         .active { display: block; }
+
         input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; background: var(--card-bg); color: var(--text); }
+
         button { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
         .btn-search { background: #3498db; }
+
         .btn-lang { background: #9b59b6; }
+
         .btn-export { background: #e67e22; margin-top: 10px; }
+
         table { width: 100%; border-collapse: collapse; margin-top: 20px; color: var(--text); }
+
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
+
         th { background: #f8f9fa; color: #333; }
+
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+
     </style>
+
 </head>
+
 <body>
 
+
+
 <div class="nav-bar">
-    <div>📊 <span data-i18n="reports_count">البلاغات </span>: <span id="count">0</span></div>
+
+    <div>📊 <span data-i18n="reports_count">البلاغات المسترجعة</span>: <span id="count">0</span></div>
+
     <div>
+
         <button onclick="toggleDarkMode()">🌙/☀️</button>
+
         <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
+
         <button onclick="showPage('home')" data-i18n="nav_home">الرئيسية</button>
+
         <button onclick="showPage('report')" data-i18n="nav_report">تقديم بلاغ</button>
+
         <button onclick="showPage('logs')" data-i18n="nav_logs">السجلات</button>
+
     </div>
+
 </div>
+
+
 
 <div id="home" class="page active">
+
     <h1 data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
+
     <p data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
+
 </div>
+
+
 
 <div id="report" class="page">
+
     <h2 data-i18n="rep_title">تقديم بلاغ جديد</h2>
+
     <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
+
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
+
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
+
     <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
+
     <input type="file" id="imageInput" accept="image/*">
+
     <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
+
 </div>
+
+
 
 <div id="logs" class="page">
+
     <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
+
     <div class="search-container">
+
         <input type="tel" id="searchPhone" placeholder="رقم هاتفك" data-i18n-placeholder="placeholder_search">
+
         <button class="btn-search" onclick="loadUserComplaints()" data-i18n="btn_search">عرض السجل</button>
+
     </div>
+
     <button class="btn-export" onclick="exportToCSV()" data-i18n="btn_export">تصدير إلى CSV</button>
+
     <table>
+
         <thead>
+
             <tr>
+
                 <th data-i18n="th_date">التاريخ والوقت</th>
+
                 <th data-i18n="th_desc">التفاصيل</th>
+
                 <th data-i18n="th_cat">التصنيف</th>
+
                 <th data-i18n="th_conf">الثقة</th>
+
             </tr>
+
         </thead>
+
         <tbody id="logsBody"></tbody>
+
     </table>
+
 </div>
 
+
+
 <script>
+
     const translations = {
+
         ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
+
         en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
+
     };
 
+
+
     let currentLang = 'ar';
+
     function toggleLanguage() {
+
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
+
         document.getElementById('htmlTag').lang = currentLang;
+
         document.getElementById('htmlTag').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
         document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = translations[currentLang][el.dataset.i18n]);
+
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = translations[currentLang][el.dataset.i18nPlaceholder]);
+
     }
+
+
 
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
 
+
+
     function showPage(pageId) {
+
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
         document.getElementById(pageId).classList.add('active');
+
     }
+
+
 
     async function classifyAndSubmit() {
+
         const name = document.getElementById('name').value.trim();
+
         const phone = document.getElementById('phone').value.trim();
+
         const text = document.getElementById('desc').value;
+
         if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
+
         sendData(name, phone, text);
+
     }
+
+
 
     async function sendData(name, phone, text) {
+
         try {
+
             const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
+
             const data = await response.json();
+
             alert("تم التصنيف بنجاح: " + data.category);
+
             document.getElementById('searchPhone').value = phone;
+
             showPage('logs');
+
             loadUserComplaints();
+
         } catch (e) { alert("خطأ في الاتصال بالسيرفر"); }
+
     }
+
+
 
     async function loadUserComplaints() {
+
         const phone = document.getElementById('searchPhone').value.trim();
+
         const logsBody = document.getElementById('logsBody');
+
         try {
+
             const response = await fetch(`/api/complaints?phone=${phone}`);
+
             const complaints = await response.json();
+
             logsBody.innerHTML = '';
+
             complaints.forEach(c => {
+
                 logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`;
+
             });
+
             document.getElementById('count').innerText = complaints.length;
+
         } catch (e) { logsBody.innerHTML = '<tr><td colspan="4">خطأ في جلب البيانات</td></tr>'; }
+
     }
 
+
+
     function exportToCSV() {
+
         let csvContent = "data:text/csv;charset=utf-8,التاريخ,التفاصيل,التصنيف,الثقة\n";
+
         Array.from(document.querySelectorAll('#logsBody tr')).forEach(row => {
+
             csvContent += Array.from(row.querySelectorAll('td')).map(td => td.innerText).join(",") + "\n";
+
         });
+
         const link = document.createElement("a");
+
         link.setAttribute("href", encodeURI(csvContent));
+
         link.setAttribute("download", "reports.csv");
+
         document.body.appendChild(link);
+
         link.click();
+
     }
+
 </script>
+
 </body>
+
 </html>
