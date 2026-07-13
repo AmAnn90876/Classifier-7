@@ -59,10 +59,10 @@ def predict():
         category = category_map.get(pred_numeric, "غير معروف")
         confidence = float(max(model.predict_proba(vectorized)[0]))
         
-        # حفظ البلاغ مباشرة في قاعدة بيانات Supabase مع رقم الهاتف
+        # حفظ البلاغ مباشرة في قاعدة بيانات Supabase مع رقم الهاتف والاسم
         report_data = {
             "name": data.get('name', 'غير معرف'),
-            "phone": data.get('phone', ''),  # استقبال رقم الهاتف المخزن أو المرسل من الواجهة
+            "phone": data.get('phone', ''),
             "details": complaint_text,
             "category": category
         }
@@ -75,12 +75,9 @@ def predict():
 @app.route('/api/complaints')
 def get_complaints():
     try:
-        # جلب رقم الهاتف المرسل كـ Parameter من الواجهة (مثال: /api/complaints?phone=05xxxxxxx)
         user_phone = request.args.get('phone')
-        
         query = supabase.table('reports').select('*')
         
-        # إذا تم إرسال رقم هاتف، قم بفلترة البلاغات ليعرض الخاصة بهذا الرقم فقط
         if user_phone:
             query = query.eq('phone', user_phone)
             
@@ -102,6 +99,47 @@ def get_complaints():
                 'confidence': "100.0%"
             })
         return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': str(e)})
+
+# مسار الـ API الجديد لحساب إحصائيات لوحة التحكم الشاملة
+@app.route('/api/dashboard-stats')
+def get_dashboard_stats():
+    try:
+        # جلب كل البلاغات لتحليلها
+        response = supabase.table('reports').select('*').order('created_at', desc=True).execute()
+        reports = response.data
+        
+        total_count = len(reports)
+        
+        # حساب تكرار كل قسم للرسم البياني
+        category_counts = {}
+        for r in reports:
+            cat = r.get('category', 'غير معروف')
+            category_counts[cat] = category_counts.get(cat, 0) + 1
+            
+        # تنسيق البلاغات الأخيرة لعرضها في جدول الـ Dashboard الشامل
+        formatted_reports = []
+        for r in reports[:10]: # سنعرض آخر 10 بلاغات في الصفحة الرئيسية للإيجاز
+            try:
+                dt = datetime.strptime(r['created_at'].split('.')[0], '%Y-%m-%dT%H:%M:%S')
+                formatted_time = dt.strftime('%Y-%m-%d %H:%M')
+            except:
+                formatted_time = datetime.utcnow().strftime('%Y-%m-%d %H:%M')
+                
+            formatted_reports.append({
+                'name': r.get('name', 'غير معرف'),
+                'phone': r.get('phone', 'غير متوفر'),
+                'text': r.get('details', ''),
+                'category': r.get('category', 'غير معروف'),
+                'timestamp': formatted_time
+            })
+            
+        return jsonify({
+            'total_reports': total_count,
+            'category_distribution': category_counts,
+            'recent_reports': formatted_reports
+        })
     except Exception as e:
         return jsonify({'error': str(e)})
 
