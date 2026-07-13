@@ -25,30 +25,22 @@
     </div>
 </div>
 
-<!-- صفحة 1: الرئيسية -->
 <div id="home" class="page active">
-    <h1>مرحباً بك في نظام تصنيف البلاغات</h1>
-    <p>هذا النظام يساعدك في إدارة وتصنيف البلاغات بكفاءة واحترافية.</p>
+    <h1>نظام تصنيف البلاغات الذكي</h1>
+    <p>أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات.</p>
 </div>
 
-<!-- صفحة 2: تقديم بلاغ -->
 <div id="report" class="page">
     <h2>تقديم بلاغ جديد</h2>
     <input type="text" id="name" placeholder="اسم مقدم البلاغ">
     <textarea id="desc" placeholder="تفاصيل البلاغ..."></textarea>
-    <button onclick="submitReport()">إرسال البلاغ</button>
+    <button onclick="classifyAndSubmit()">إرسال وتصنيف</button>
 </div>
 
-<!-- صفحة 3: السجلات -->
 <div id="logs" class="page">
     <h2>سجل البلاغات</h2>
     <table>
-        <thead>
-            <tr>
-                <th>الاسم</th>
-                <th>التفاصيل</th>
-            </tr>
-        </thead>
+        <thead><tr><th>الاسم</th><th>التفاصيل</th><th>التصنيف</th></tr></thead>
         <tbody id="logsBody"></tbody>
     </table>
 </div>
@@ -61,26 +53,37 @@
         document.getElementById(pageId).classList.add('active');
     }
 
-    function submitReport() {
+    // الدالة الجديدة التي تجمع بين التصنيف والحفظ
+    async function classifyAndSubmit() {
         const name = document.getElementById('name').value;
-        const desc = document.getElementById('desc').value;
+        const text = document.getElementById('desc').value;
         
-        if(name && desc) {
-            reports.push({ name, desc });
-            
-            // تحديث العداد
+        if (!name || !text) { alert("يرجى تعبئة البيانات"); return; }
+
+        try {
+            // 1. الاتصال بالسيرفر للتصنيف
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ complaint: text })
+            });
+            const data = await response.json();
+            const category = data.category || "غير معروف";
+
+            // 2. الحفظ في الذاكرة (السجل)
+            reports.push({ name, desc: text, category });
             document.getElementById('count').innerText = reports.length;
             
-            // تحديث جدول السجلات
-            const row = `<tr><td>${name}</td><td>${desc}</td></tr>`;
+            // 3. تحديث الجدول
+            const row = `<tr><td>${name}</td><td>${text}</td><td>${category}</td></tr>`;
             document.getElementById('logsBody').innerHTML += row;
             
-            alert("تم إرسال البلاغ بنجاح!");
+            alert("تم التصنيف والحفظ: " + category);
             document.getElementById('name').value = '';
             document.getElementById('desc').value = '';
-            showPage('logs'); // الانتقال للسجلات لرؤية البلاغ
-        } else {
-            alert("يرجى تعبئة البيانات");
+            showPage('logs');
+        } catch (error) {
+            alert("فشل الاتصال بالسيرفر");
         }
     }
 </script>
