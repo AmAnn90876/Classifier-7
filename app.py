@@ -59,9 +59,10 @@ def predict():
         category = category_map.get(pred_numeric, "غير معروف")
         confidence = float(max(model.predict_proba(vectorized)[0]))
         
-        # حفظ البلاغ مباشرة في قاعدة بيانات Supabase السحابية
+        # حفظ البلاغ مباشرة في قاعدة بيانات Supabase مع رقم الهاتف
         report_data = {
-            "name": data.get('name', 'غير معرف'),  # يأخذ الاسم المرسل أو يضع اسم افتراضي
+            "name": data.get('name', 'غير معرف'),
+            "phone": data.get('phone', ''),  # استقبال رقم الهاتف المخزن أو المرسل من الواجهة
             "details": complaint_text,
             "category": category
         }
@@ -74,13 +75,20 @@ def predict():
 @app.route('/api/complaints')
 def get_complaints():
     try:
-        # جلب البلاغات من Supabase وترتيبها من الأحدث للأقدم
-        response = supabase.table('reports').select('*').order('created_at', desc=True).execute()
+        # جلب رقم الهاتف المرسل كـ Parameter من الواجهة (مثال: /api/complaints?phone=05xxxxxxx)
+        user_phone = request.args.get('phone')
+        
+        query = supabase.table('reports').select('*')
+        
+        # إذا تم إرسال رقم هاتف، قم بفلترة البلاغات ليعرض الخاصة بهذا الرقم فقط
+        if user_phone:
+            query = query.eq('phone', user_phone)
+            
+        response = query.order('created_at', desc=True).execute()
         complaints = response.data
         
         data = []
         for c in complaints:
-            # تحويل صيغة الوقت القادمة من Supabase لتطابق التصميم الحالي لديكِ
             try:
                 dt = datetime.strptime(c['created_at'].split('.')[0], '%Y-%m-%dT%H:%M:%S')
                 formatted_time = dt.strftime('%Y-%m-%d %H:%M')
@@ -91,14 +99,12 @@ def get_complaints():
                 'timestamp': formatted_time,
                 'text': c['details'],
                 'category': c['category'],
-                'confidence': "100.0%"  # قيمة افتراضية متوافقة مع شكل جدولك الحالي
+                'confidence': "100.0%"
             })
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
