@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title data-i18n="title">نظام تصنيف البلاغات الذكي</title>
+    <!-- تم إضافة مكتبة الرسم البياني هنا -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --bg: #f4f7f6; --card-bg: white; --text: #333; --nav: #2c3e50; }
         .dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #eee; --nav: #000; }
@@ -29,8 +31,7 @@
     <div>
         <button onclick="toggleDarkMode()">🌙/☀️</button>
         <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
-        <!-- تم إزالة الإيموجي من زر الإحصائيات -->
-        <button class="btn-stats" onclick="window.open('https://my-app-git3kwfxmxclxvajrjmgbp.streamlit.app/', '_blank')" data-i18n="nav_stats">الإحصائيات</button>
+        <button class="btn-stats" onclick="showPage('stats')" data-i18n="nav_stats">الإحصائيات</button>
         <button onclick="showPage('home')" data-i18n="nav_home">الرئيسية</button>
         <button onclick="showPage('report')" data-i18n="nav_report">تقديم بلاغ</button>
         <button onclick="showPage('logs')" data-i18n="nav_logs">السجلات</button>
@@ -71,6 +72,7 @@
         <tbody id="logsBody"></tbody>
     </table>
 </div>
+
 <div id="stats" class="page">
     <h2 data-i18n="nav_stats">الإحصائيات</h2>
     <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px;">
@@ -89,7 +91,9 @@
     </div>
     <canvas id="myChart"></canvas>
 </div>
+
 <script>
+    let myChart;
     const translations = {
         ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
         en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
@@ -109,6 +113,7 @@
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
+        if (pageId === 'stats') loadStats();
     }
 
     async function classifyAndSubmit() {
@@ -155,36 +160,25 @@
         document.body.appendChild(link);
         link.click();
     }
-async function loadStats() {
-    try {
-        // نطلب البيانات من السيرفر
-        const response = await fetch('/api/stats-detailed'); // تأكد أن هذا الرابط يرجع البيانات
-        const data = await response.json(); 
-        
-        // تحديث الأرقام في البطاقات
-        document.getElementById('dailyStats').innerText = data.daily;
-        document.getElementById('weeklyStats').innerText = data.weekly;
-        document.getElementById('monthlyStats').innerText = data.monthly;
 
-        // تحديث الرسم البياني
-        const ctx = document.getElementById('myChart').getContext('2d');
-        if (myChart) myChart.destroy();
-        myChart = new Chart(ctx, {
-            type: 'line', // يفضل Line Chart للمدد الزمنية
-            data: {
-                labels: ['اليوم', 'الأسبوع', 'الشهر'],
-                datasets: [{
-                    label: 'عدد البلاغات',
-                    data: [data.daily, data.weekly, data.monthly],
-                    borderColor: '#e67e22',
-                    fill: true
-                }]
-            }
-        });
-    } catch (e) {
-        console.error("خطأ في جلب الإحصائيات", e);
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/stats-detailed');
+            const data = await response.json(); 
+            document.getElementById('dailyStats').innerText = data.daily;
+            document.getElementById('weeklyStats').innerText = data.weekly;
+            document.getElementById('monthlyStats').innerText = data.monthly;
+            const ctx = document.getElementById('myChart').getContext('2d');
+            if (myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['اليوم', 'الأسبوع', 'الشهر'],
+                    datasets: [{ label: 'عدد البلاغات', data: [data.daily, data.weekly, data.monthly], borderColor: '#e67e22', fill: true }]
+                }
+            });
+        } catch (e) { console.error("Error", e); }
     }
-}
 </script>
 </body>
 </html>
