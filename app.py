@@ -142,13 +142,6 @@ def get_dashboard_stats():
         })
     except Exception as e:
         return jsonify({'error': str(e)})
-from flask import Flask, render_template, jsonify, request
-
-
-@app.route('/dashboard')
-def dashboard():
-    return render_template('dashboard.html')
-
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
