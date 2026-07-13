@@ -14,7 +14,7 @@
         button { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
         .btn-search { background: #3498db; }
         .btn-lang { background: #9b59b6; }
-        .btn-stats { background: #e67e22; } /* لون برتقالي مميز لزر الإحصائيات المتناسق مع التصميم */
+        .btn-stats { background: #e67e22; } 
         .btn-export { background: #e67e22; margin-top: 10px; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; color: var(--text); }
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
@@ -29,8 +29,8 @@
     <div>
         <button onclick="toggleDarkMode()">🌙/☀️</button>
         <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
-        <!-- زر فتح موقع الإحصائيات الخارجي في علامة تبويب جديدة -->
-        <button class="btn-stats" onclick="window.open('https://my-app-git3kwfxmxclxvajrjmgbp.streamlit.app/', '_blank')" data-i18n="nav_stats">📈 الإحصائيات</button>
+        <!-- تم إزالة الإيموجي من زر الإحصائيات -->
+        <button class="btn-stats" onclick="window.open('https://my-app-git3kwfxmxclxvajrjmgbp.streamlit.app/', '_blank')" data-i18n="nav_stats">الإحصائيات</button>
         <button onclick="showPage('home')" data-i18n="nav_home">الرئيسية</button>
         <button onclick="showPage('report')" data-i18n="nav_report">تقديم بلاغ</button>
         <button onclick="showPage('logs')" data-i18n="nav_logs">السجلات</button>
@@ -74,8 +74,8 @@
 
 <script>
     const translations = {
-        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: " الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
-        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: " Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
+        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
+        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
     };
 
     let currentLang = 'ar';
