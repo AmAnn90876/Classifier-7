@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 # إعداد الاتصال بقاعدة بيانات Supabase السحابية
 SUPABASE_URL = "https://asjhgyhvngmbbevrzfjm.supabase.co"
-SUPABASE_KEY = "ضعي_هنا_مفتاح_sb_publishable_الذي_نسختيه"
+SUPABASE_KEY = "sb_publishable_B6VEA-7t67Fk0NMisAQg7A_VfpsBge1"
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -61,7 +61,7 @@ def predict():
         
         # حفظ البلاغ مباشرة في قاعدة بيانات Supabase السحابية
         report_data = {
-            "name": data.get('name', 'reham'),  # يأخذ الاسم المرسل أو يضع اسم افتراضي
+            "name": data.get('name', 'غير معرف'),  # يأخذ الاسم المرسل أو يضع اسم افتراضي
             "details": complaint_text,
             "category": category
         }
@@ -98,5 +98,7 @@ def get_complaints():
         return jsonify({'error': str(e)})
 
 if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port)
