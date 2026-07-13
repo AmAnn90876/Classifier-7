@@ -1,439 +1,279 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+
+<html lang="ar" dir="rtl" id="htmlTag">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام تصنيف البلاغات الذكي</title>
-    <!-- تضمين مكتبة Chart.js للرسوم البيانية -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <title data-i18n="title">نظام تصنيف البلاغات الذكي</title>
+
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .nav-bar { background: #2c3e50; color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
-        
-        /* تصميم البطاقة البيضاء الكبيرة الرئيسية */
-        .page { display: none; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+
+        :root { --bg: #f4f7f6; --card-bg: white; --text: #333; --nav: #2c3e50; }
+
+        .dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #eee; --nav: #000; }
+
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; }
+
+        .nav-bar { background: var(--nav); color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+
+        .page { display: none; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
         .active { display: block; }
-        
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
-        button { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; background: var(--card-bg); color: var(--text); }
+
+        button { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+
         .btn-search { background: #3498db; }
-        .btn-nav { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.3); transition: 0.3s; margin-left: 5px; color: white; }
-        .btn-nav:hover { background: #2ecc71; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; border-radius: 8px; overflow: hidden; }
-        th, td { border: 1px solid #eee; padding: 12px; text-align: right; }
-        th { background: #34495e; color: white; }
-        tr:hover { background-color: #f9f9f9; }
-        
-        .search-container { display: flex; gap: 10px; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
-        .search-container input { margin: 0; }
-        .tag-cat { display: inline-block; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px; background: #e8f5e9; color: #2e7d32; }
 
-        /* تنسيقات الـ Dashboard داخل البطاقة البيضاء */
-        .dashboard-section { margin-top: 30px; border-top: 2px solid #f1f2f6; padding-top: 20px; }
-        .stats-container { display: flex; gap: 20px; margin: 20px 0; flex-wrap: wrap; }
-        .stat-card { flex: 1; min-width: 220px; background: #f8f9fa; padding: 20px; border-radius: 12px; border-right: 5px solid #3498db; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
-        .stat-card.total { border-right-color: #2ecc71; }
-        .stat-card h3 { margin: 0 0 8px 0; color: #7f8c8d; font-size: 14px; }
-        .stat-card p { margin: 0; font-size: 28px; font-weight: bold; color: #2c3e50; }
+        .btn-lang { background: #9b59b6; }
 
-        /* تصميم الدوائر الزمنية التفاعلية */
-        .time-circles-container { display: flex; justify-content: space-around; gap: 15px; margin: 25px 0; flex-wrap: wrap; }
-        .time-circle-box { background: #f8f9fa; padding: 15px; border-radius: 15px; text-align: center; flex: 1; min-width: 130px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); display: flex; flex-direction: column; align-items: center; }
-        .time-circle-box h4 { margin: 0 0 10px 0; color: #34495e; font-size: 15px; }
-        
-        .progress-ring-wrapper { position: relative; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
-        .progress-ring-text { position: absolute; font-size: 20px; font-weight: bold; color: #2c3e50; }
-        
-        /* تصميم الدائرة بـ SVG لضمان مرونة الحركة والدقة */
-        .progress-ring { transform: rotate(-90deg); transform-origin: 50% 50%; }
-        .progress-ring__circle-bg { fill: transparent; stroke: #e6e9ed; stroke-width: 8; }
-        .progress-ring__circle { fill: transparent; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.35s; }
-        
-        /* تلوين مسارات الحركة لكل دائرة زمنية */
-        .circle-day { stroke: #e74c3c; }
-        .circle-week { stroke: #f1c40f; }
-        .circle-month { stroke: #2ecc71; }
+        .btn-export { background: #e67e22; margin-top: 10px; }
 
-        .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px; }
-        @media (max-width: 900px) {
-            .dashboard-grid { grid-template-columns: 1fr; }
-        }
-        .chart-box { background: #f8f9fa; padding: 20px; border-radius: 12px; border: 1px solid #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 250px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; color: var(--text); }
+
+        th, td { border: 1px solid #555; padding: 12px; text-align: right; }
+
+        th { background: #f8f9fa; color: #333; }
+
+        .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+
     </style>
+
 </head>
+
 <body>
 
+
+
 <div class="nav-bar">
-    <div>📊 البلاغات الكلية: <span id="count">0</span></div>
+
+    <div>📊 <span data-i18n="reports_count">البلاغات المسترجعة</span>: <span id="count">0</span></div>
+
     <div>
-        <button class="btn-nav" onclick="showPage('home')">الرئيسية</button>
-        <button class="btn-nav" onclick="showPage('report')">تقديم بلاغ</button>
-        <button class="btn-nav" onclick="showPage('logs')">السجلات</button>
+
+        <button onclick="toggleDarkMode()">🌙/☀️</button>
+
+        <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
+
+        <button onclick="showPage('home')" data-i18n="nav_home">الرئيسية</button>
+
+        <button onclick="showPage('report')" data-i18n="nav_report">تقديم بلاغ</button>
+
+        <button onclick="showPage('logs')" data-i18n="nav_logs">السجلات</button>
+
     </div>
+
 </div>
 
-<!-- البطاقة البيضاء الرئيسية وبها الـ Dashboard المطور والمحمي للخصوصية -->
+
+
 <div id="home" class="page active">
-    <h1 style="margin-top: 0; color: #2c3e50;">نظام تصنيف البلاغات الذكي</h1>
-    <p style="color: #7f8c8d; margin-bottom: 25px;">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
 
-    <!-- قسم لوحة التحكم الداش بورد المدمج -->
-    <div class="dashboard-section">
-        <h2 style="color: #2c3e50; font-size: 22px; margin-bottom: 5px;">📊 لوحة مراقبة البلاغات وتحليل البيانات الحية</h2>
-        <p style="color: #95a5a6; margin: 0 0 20px 0; font-size: 14px;">إحصائيات فورية ومباشرة للبلاغات الواردة للنظام.</p>
+    <h1 data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
 
-        <!-- كروت الإحصائيات السريعة العامة -->
-        <div class="stats-container">
-            <div class="stat-card total">
-                <h3>إجمالي البلاغات المسجلة</h3>
-                <p id="statTotal">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>القسم الأكثر بلاغات</h3>
-                <p id="statTopCategory" style="font-size: 20px; color: #3498db; padding-top: 5px;">لا يوجد حالياً</p>
-            </div>
-        </div>
+    <p data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
 
-        <!-- دوائر الفلاتر الزمنية الثلاث (اليوم، الأسبوع، الشهر) -->
-        <div class="time-circles-container">
-            <!-- دائرة إحصائيات اليوم -->
-            <div class="time-circle-box">
-                <h4>بلاغات اليوم</h4>
-                <div class="progress-ring-wrapper">
-                    <svg class="progress-ring" width="90" height="90">
-                        <circle class="progress-ring__circle-bg" r="38" cx="45" cy="45"/>
-                        <circle id="circleDay" class="progress-ring__circle circle-day" r="38" cx="45" cy="45" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
-                    </svg>
-                    <span id="textDay" class="progress-ring-text">0</span>
-                </div>
-            </div>
-
-            <!-- دائرة إحصائيات الأسبوع -->
-            <div class="time-circle-box">
-                <h4>بلاغات الأسبوع</h4>
-                <div class="progress-ring-wrapper">
-                    <svg class="progress-ring" width="90" height="90">
-                        <circle class="progress-ring__circle-bg" r="38" cx="45" cy="45"/>
-                        <circle id="circleWeek" class="progress-ring__circle circle-week" r="38" cx="45" cy="45" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
-                    </svg>
-                    <span id="textWeek" class="progress-ring-text">0</span>
-                </div>
-            </div>
-
-            <!-- دائرة إحصائيات الشهر -->
-            <div class="time-circle-box">
-                <h4>بلاغات الشهر</h4>
-                <div class="progress-ring-wrapper">
-                    <svg class="progress-ring" width="90" height="90">
-                        <circle class="progress-ring__circle-bg" r="38" cx="45" cy="45"/>
-                        <circle id="circleMonth" class="progress-ring__circle circle-month" r="38" cx="45" cy="45" stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
-                    </svg>
-                    <span id="textMonth" class="progress-ring-text">0</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="dashboard-grid">
-            <!-- جدول البلاغات الأخيرة مع إخفاء حقول الخصوصية تماماً -->
-            <div style="overflow-x: auto;">
-                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #2c3e50;">📋 البلاغات الأخيرة المسجلة</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>التاريخ والوقت</th>
-                            <th>تفاصيل البلاغ الوارد</th>
-                            <th>التصنيف التلقائي</th>
-                        </tr>
-                    </thead>
-                    <tbody id="adminLogsBody">
-                        <tr>
-                            <td colspan="3" style="text-align: center; color: #95a5a6; padding: 30px 10px;">لا توجد بلاغات مسجلة حتى الآن في السحابة.</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- مكان المخطط الدائري -->
-            <div class="chart-box">
-                <h3 style="margin: 0 0 15px 0; font-size: 16px; color: #2c3e50;">📊 توزيع نسب البلاغات</h3>
-                <div style="width: 100%; max-width: 200px; height: 200px; position: relative;">
-                    <canvas id="categoriesChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
-<!-- صفحة تقديم البلاغ -->
+
+
 <div id="report" class="page">
-    <h2>تقديم بلاغ جديد</h2>
-    <input type="text" id="name" placeholder="اسم مقدم البلاغ">
-    <input type="tel" id="phone" placeholder="رقم الهاتف (مثال: 05xxxxxxxx)" required>
-    <textarea id="desc" placeholder="تفاصيل البلاغ..."></textarea>
-    
-    <label>إرفاق صورة للحالة (اختياري):</label>
+
+    <h2 data-i18n="rep_title">تقديم بلاغ جديد</h2>
+
+    <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
+
+    <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
+
+    <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
+
+    <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
+
     <input type="file" id="imageInput" accept="image/*">
-    <button onclick="classifyAndSubmit()">إرسال وتصنيف</button>
+
+    <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
+
 </div>
 
-<!-- صفحة السجلات -->
+
+
 <div id="logs" class="page">
-    <h2>سجل البلاغات الخاصة بك</h2>
-    <p style="color: #7f8c8d;">أدخل رقم هاتفك لاسترجاع قائمة البلاغات الخاصة بك فقط.</p>
-    
+
+    <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
+
     <div class="search-container">
-        <input type="tel" id="searchPhone" placeholder="أدخل رقم هاتفك للبحث...">
-        <button class="btn-search" onclick="loadUserComplaints()">عرض سجلاتي</button>
+
+        <input type="tel" id="searchPhone" placeholder="رقم هاتفك" data-i18n-placeholder="placeholder_search">
+
+        <button class="btn-search" onclick="loadUserComplaints()" data-i18n="btn_search">عرض السجل</button>
+
     </div>
+
+    <button class="btn-export" onclick="exportToCSV()" data-i18n="btn_export">تصدير إلى CSV</button>
 
     <table>
+
         <thead>
+
             <tr>
-                <th>التاريخ والوقت</th>
-                <th>تفاصيل البلاغ</th>
-                <th>التصنيف المتوقع</th>
-                <th>نسبة التأكيد</th>
+
+                <th data-i18n="th_date">التاريخ والوقت</th>
+
+                <th data-i18n="th_desc">التفاصيل</th>
+
+                <th data-i18n="th_cat">التصنيف</th>
+
+                <th data-i18n="th_conf">الثقة</th>
+
             </tr>
+
         </thead>
-        <tbody id="logsBody">
-            <tr>
-                <td colspan="4" style="text-align: center; color: #7f8c8d;">يرجى إدخال رقم هاتفك بالأعلى للبحث عن سجل بلاغاتك.</td>
-            </tr>
-        </tbody>
+
+        <tbody id="logsBody"></tbody>
+
     </table>
+
 </div>
 
-<script>
-    let myChart = null;
 
-    // استدعاء جلب وتحديث الإحصائيات العامة فور تحميل الصفحة بنجاح
-    window.onload = function() {
-        initDefaultChart(); // رسم مخطط بياني افتراضي فارغ لضمان الظهور الفوري
-        loadDashboardStats(); // جلب الإحصائيات الحقيقية وتحديث الدوائر التفاعلية
+
+<script>
+
+    const translations = {
+
+        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
+
+        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
+
     };
 
+
+
+    let currentLang = 'ar';
+
+    function toggleLanguage() {
+
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+
+        document.getElementById('htmlTag').lang = currentLang;
+
+        document.getElementById('htmlTag').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+
+        document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = translations[currentLang][el.dataset.i18n]);
+
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = translations[currentLang][el.dataset.i18nPlaceholder]);
+
+    }
+
+
+
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+
+
+
     function showPage(pageId) {
+
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
         document.getElementById(pageId).classList.add('active');
-        if (pageId === 'home') {
-            loadDashboardStats();
-        }
+
     }
 
-    // دالة للتحكم في تعبئة الدوائر التفاعلية بناءً على النسبة المئوية للبلاغات
-    function setCircleProgress(circleId, count, maxPossibleCount) {
-        const circle = document.getElementById(circleId);
-        const radius = circle.r.baseVal.value;
-        const circumference = 2 * Math.PI * radius; // 238.76 تقريباً
-        
-        // حساب النسبة المئوية للتعبئة
-        let percent = maxPossibleCount > 0 ? (count / maxPossibleCount) * 100 : 0;
-        if (percent > 100) percent = 100; // سقف تعبئة الدائرة 100%
-        
-        const offset = circumference - (percent / 100) * circumference;
-        circle.style.strokeDasharray = `${circumference} ${circumference}`;
-        circle.style.strokeDashoffset = offset;
-    }
 
-    // رسم بياني مبدئي لضمان عدم بقاء المخطط فارغاً
-    function initDefaultChart() {
-        const ctx = document.getElementById('categoriesChart').getContext('2d');
-        myChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['لا توجد بيانات'],
-                datasets: [{
-                    data: [100],
-                    backgroundColor: ['#e0e0e0']
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                }
-            }
-        });
-    }
 
-    // جلب الإحصائيات العامة وتحديث الـ Dashboard والدوائر
-    async function loadDashboardStats() {
-        try {
-            const response = await fetch('/api/dashboard-stats');
-            const data = await response.json();
-            
-            if (data.error) return;
-
-            // تحديث العدد الإجمالي بالعداد
-            document.getElementById('count').innerText = data.total_reports || 0;
-            document.getElementById('statTotal').innerText = data.total_reports || 0;
-            
-            // تعبئة جدول البلاغات مع المحافظة التامة على الخصوصية (إخفاء الاسم والرقم)
-            const adminBody = document.getElementById('adminLogsBody');
-            adminBody.innerHTML = '';
-            if (!data.recent_reports || data.recent_reports.length === 0) {
-                adminBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #95a5a6; padding: 30px 10px;">لا توجد بلاغات مسجلة حتى الآن في السحابة.</td></tr>';
-            } else {
-                data.recent_reports.forEach(r => {
-                    adminBody.innerHTML += `<tr>
-                        <td>${r.timestamp}</td>
-                        <td>${r.text}</td>
-                        <td><span class="tag-cat">${r.category}</span></td>
-                    </tr>`;
-                });
-            }
-
-            // تحديث الدوائر الزمنية التفاعلية
-            // سنفترض أن السيرفر يعيد الحساب الزمني أو سنستخلص الأعداد ديناميكياً من المجموع الإجمالي للعرض
-            const dayCount = data.reports_today || 0;
-            const weekCount = data.reports_this_week || 0;
-            const monthCount = data.reports_this_month || 0;
-
-            document.getElementById('textDay').innerText = dayCount;
-            document.getElementById('textWeek').innerText = weekCount;
-            document.getElementById('textMonth').innerText = monthCount;
-
-            // تحديث نسبة التعبئة الرسومية للدوائر (تنسب إلى سقف أقصى افتراضي وهو 20 بلاغاً كمعيار تفاعلي)
-            setCircleProgress('circleDay', dayCount, 10); 
-            setCircleProgress('circleWeek', weekCount, 25);
-            setCircleProgress('circleMonth', monthCount, 50);
-
-            // تحديد وتحديث القسم الأكثر شيوعاً بالبلاغات
-            const cats = data.category_distribution || {};
-            let topCat = "لا يوجد";
-            let maxVal = 0;
-            for (let c in cats) {
-                if (cats[c] > maxVal) {
-                    maxVal = cats[c];
-                    topCat = c;
-                }
-            }
-            if (maxVal > 0) {
-                document.getElementById('statTopCategory').innerText = topCat + ` (${maxVal})`;
-            } else {
-                document.getElementById('statTopCategory').innerText = "لا يوجد حالياً";
-            }
-
-            // بناء وتحديث المخطط الدائري التفاعلي بالبيانات الجديدة
-            const labels = Object.keys(cats);
-            const values = Object.values(cats);
-
-            if (labels.length > 0 && values.reduce((a, b) => a + b, 0) > 0) {
-                if (myChart) {
-                    myChart.destroy();
-                }
-                const ctx = document.getElementById('categoriesChart').getContext('2d');
-                myChart = new Chart(ctx, {
-                    type: 'pie',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: values,
-                            backgroundColor: [
-                                '#2ecc71', '#3498db', '#9b59b6', '#f1c40f', 
-                                '#e67e22', '#e74c3c', '#1abc9c', '#34495e'
-                            ]
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: { display: false }
-                        }
-                    }
-                });
-            }
-
-        } catch (error) {
-            console.log("السيرفر لا يزال يقوم بالتحميل أو لا توجد بيانات مسجلة حالياً لبناء الإحصائيات.");
-        }
-    }
-
-    // إرسال بلاغ جديد
     async function classifyAndSubmit() {
+
         const name = document.getElementById('name').value.trim();
+
         const phone = document.getElementById('phone').value.trim();
+
         const text = document.getElementById('desc').value;
-        
-        if (!name || !phone || !text) { 
-            alert("يرجى ملء جميع الحقول المطلوبة لبناء البلاغ."); 
-            return; 
-        }
 
-        try {
-            const response = await fetch('/predict', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    complaint: text,
-                    name: name,
-                    phone: phone
-                })
-            });
-            const data = await response.json();
-            
-            if (data.error) {
-                alert("خطأ أثناء معالجة الطلب: " + data.error);
-                return;
-            }
+        if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
 
-            alert("تم التصنيف بنجاح تحت قسم: " + data.category);
-            
-            // تصفير الحقول وإعادة المستخدم للرئيسية المحدثة
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('desc').value = '';
-            document.getElementById('imageInput').value = '';
+        sendData(name, phone, text);
 
-            showPage('home');
-            
-        } catch (error) {
-            alert("حدث خطأ في الاتصال بالسيرفر أثناء التصنيف.");
-        }
     }
 
-    // جلب السجلات الشخصية
+
+
+    async function sendData(name, phone, text) {
+
+        try {
+
+            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
+
+            const data = await response.json();
+
+            alert("تم التصنيف بنجاح: " + data.category);
+
+            document.getElementById('searchPhone').value = phone;
+
+            showPage('logs');
+
+            loadUserComplaints();
+
+        } catch (e) { alert("خطأ في الاتصال بالسيرفر"); }
+
+    }
+
+
+
     async function loadUserComplaints() {
+
         const phone = document.getElementById('searchPhone').value.trim();
-        if (!phone) {
-            alert("يرجى كتابة رقم الهاتف للبحث.");
-            return;
-        }
 
         const logsBody = document.getElementById('logsBody');
-        logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">جاري البحث عن سجلاتك...</td></tr>';
 
         try {
+
             const response = await fetch(`/api/complaints?phone=${phone}`);
+
             const complaints = await response.json();
 
-            if (response.status !== 200 || complaints.error) {
-                logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">فشل الاتصال بقاعدة البيانات.</td></tr>';
-                return;
-            }
-
             logsBody.innerHTML = '';
-            if (complaints.length === 0) {
-                logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">لا توجد سجلات مرتبطة برقم الهاتف المدخل.</td></tr>';
-                return;
-            }
 
             complaints.forEach(c => {
-                logsBody.innerHTML += `<tr>
-                    <td>${c.timestamp}</td>
-                    <td>${c.text}</td>
-                    <td><strong style="color: #2e7d32;">${c.category}</strong></td>
-                    <td>${c.confidence}</td>
-                </tr>`;
+
+                logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`;
+
             });
 
-        } catch (error) {
-            logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">خطأ أثناء جلب البيانات.</td></tr>';
-        }
+            document.getElementById('count').innerText = complaints.length;
+
+        } catch (e) { logsBody.innerHTML = '<tr><td colspan="4">خطأ في جلب البيانات</td></tr>'; }
+
     }
+
+
+
+    function exportToCSV() {
+
+        let csvContent = "data:text/csv;charset=utf-8,التاريخ,التفاصيل,التصنيف,الثقة\n";
+
+        Array.from(document.querySelectorAll('#logsBody tr')).forEach(row => {
+
+            csvContent += Array.from(row.querySelectorAll('td')).map(td => td.innerText).join(",") + "\n";
+
+        });
+
+        const link = document.createElement("a");
+
+        link.setAttribute("href", encodeURI(csvContent));
+
+        link.setAttribute("download", "reports.csv");
+
+        document.body.appendChild(link);
+
+        link.click();
+
+    }
+
 </script>
+
 </body>
+
 </html>
