@@ -4,16 +4,23 @@
     <meta charset="UTF-8">
     <title>نظام تصنيف البلاغات الذكي</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; margin: 0; padding: 20px; }
-        .nav-bar { background: #2c3e50; color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
-        .page { display: none; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        :root {
+            --bg: #f4f7f6; --card-bg: white; --text: #333; --nav: #2c3e50;
+        }
+        .dark-mode {
+            --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #eee; --nav: #000;
+        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; }
+        .nav-bar { background: var(--nav); color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+        .page { display: none; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .active { display: block; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; box-sizing: border-box; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; background: var(--card-bg); color: var(--text); }
         button { background: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
         .btn-search { background: #3498db; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: right; }
-        th { background: #f8f9fa; }
+        .btn-export { background: #e67e22; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; color: var(--text); }
+        th, td { border: 1px solid #555; padding: 12px; text-align: right; }
+        th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
         .search-container input { margin: 0; }
     </style>
@@ -23,6 +30,7 @@
 <div class="nav-bar">
     <div>📊 البلاغات المسترجعة: <span id="count">0</span></div>
     <div>
+        <button onclick="toggleDarkMode()">🌙/☀️</button>
         <button onclick="showPage('home')">الرئيسية</button>
         <button onclick="showPage('report')">تقديم بلاغ</button>
         <button onclick="showPage('logs')">السجلات</button>
@@ -31,7 +39,7 @@
 
 <div id="home" class="page active">
     <h1>نظام تصنيف البلاغات الذكي</h1>
-    <p>أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
+    <p>أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية والمحلية.</p>
 </div>
 
 <div id="report" class="page">
@@ -39,8 +47,6 @@
     <input type="text" id="name" placeholder="اسم مقدم البلاغ">
     <input type="tel" id="phone" placeholder="رقم الهاتف (مثال: 05xxxxxxxx)" required>
     <textarea id="desc" placeholder="تفاصيل البلاغ..."></textarea>
-    
-    <!-- حقل اختيار الصورة (اختياري) -->
     <label>إرفاق صورة للحالة (اختياري):</label>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="classifyAndSubmit()">إرسال وتصنيف</button>
@@ -48,26 +54,23 @@
 
 <div id="logs" class="page">
     <h2>سجل البلاغات الخاصة بك</h2>
-    
-    <!-- محرك البحث برقم الهاتف للاستعراض الشخصي -->
     <div class="search-container">
-        <input type="tel" id="searchPhone" placeholder="أدخل رقم هاتفك لعرض بلاغاتك السابقة فقط">
+        <input type="tel" id="searchPhone" placeholder="أدخل رقم هاتفك لعرض بلاغاتك">
         <button class="btn-search" onclick="loadUserComplaints()">عرض السجل</button>
     </div>
+    <button class="btn-export" onclick="exportToCSV()">تصدير البلاغات الحالية إلى CSV</button>
 
     <table>
         <thead>
             <tr>
-                <th>التاريخ والوقت</th>
-                <th>تفاصيل البلاغ</th>
-                <th>التصنيف المتوقع</th>
-                <th>نسبة التأكيد</th>
+                <th>التاريخ</th>
+                <th>التفاصيل</th>
+                <th>التصنيف</th>
+                <th>الثقة</th>
             </tr>
         </thead>
         <tbody id="logsBody">
-            <tr>
-                <td colspan="4" style="text-align: center; color: #7f8c8d;">يرجى إدخال رقم هاتفك بالأعلى للبحث عن سجل بلاغاتك.</td>
-            </tr>
+            <tr><td colspan="4" style="text-align: center; color: #7f8c8d;">يرجى البحث برقم الهاتف لعرض البلاغات.</td></tr>
         </tbody>
     </table>
 </div>
@@ -78,17 +81,16 @@
         document.getElementById(pageId).classList.add('active');
     }
 
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+    }
+
     async function classifyAndSubmit() {
-        const name = document.getElementById('name').value.strip ? document.getElementById('name').value.trim() : document.getElementById('name').value;
-        const phone = document.getElementById('phone').value.trim ? document.getElementById('phone').value.trim() : document.getElementById('phone').value;
+        const name = document.getElementById('name').value.trim();
+        const phone = document.getElementById('phone').value.trim();
         const text = document.getElementById('desc').value;
         
-        if (!name || !phone || !text) { 
-            alert("يرجى تعبئة الاسم، رقم الهاتف، وتفاصيل البلاغ"); 
-            return; 
-        }
-
-        // إرسال البيانات مباشرة مع رقم الهاتف
+        if (!name || !phone || !text) { alert("يرجى تعبئة الحقول المطلوبة"); return; }
         sendData(name, phone, text);
     }
 
@@ -97,81 +99,51 @@
             const response = await fetch('/predict', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    complaint: text,
-                    name: name,
-                    phone: phone
-                })
+                body: JSON.stringify({ complaint: text, name, phone })
             });
             const data = await response.json();
             
-            if (data.error) {
-                alert("خطأ من السيرفر: " + data.error);
-                return;
-            }
+            // حفظ محلي إضافي
+            let localReports = JSON.parse(localStorage.getItem('my_reports') || '[]');
+            localReports.push({ name, phone, text, category: data.category, timestamp: new Date().toLocaleString() });
+            localStorage.setItem('my_reports', JSON.stringify(localReports));
 
-            const category = data.category || "غير معروف";
-            alert("تم التصنيف بنجاح تحت قسم: " + category);
-            
-            // تنظيف الحقول بعد الإرسال
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('desc').value = '';
-            document.getElementById('imageInput').value = '';
-
-            // تحويل المستخدم تلقائياً لصفحة السجلات وتعبئة رقم هاتفه فيها لعرض بلاغه الجديد فوراً
+            alert("تم التصنيف بنجاح: " + data.category);
             document.getElementById('searchPhone').value = phone;
             showPage('logs');
             loadUserComplaints();
-            
-        } catch (error) {
-            alert("فشل الاتصال بالسيرفر، تأكد من تشغيل المشروع على Render");
-        }
+        } catch (e) { alert("فشل الاتصال"); }
     }
 
-    // دالة جلب بلاغات مستخدم معين بناءً على رقم هاتفه
     async function loadUserComplaints() {
-        const phone = document.getElementById('searchPhone').value.trim ? document.getElementById('searchPhone').value.trim() : document.getElementById('searchPhone').value;
-        if (!phone) {
-            alert("يرجى كتابة رقم الهاتف للبحث عن السجل");
-            return;
-        }
+        const phone = document.getElementById('searchPhone').value.trim();
+        if (!phone) { alert("أدخل رقم الهاتف"); return; }
 
         const logsBody = document.getElementById('logsBody');
-        logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">جاري جلب السجلات...</td></tr>';
-
         try {
-            // استدعاء الـ API مع بارامتر رقم الهاتف للفلترة المباشرة
             const response = await fetch(`/api/complaints?phone=${phone}`);
             const complaints = await response.json();
-
-            if (response.status !== 200 || complaints.error) {
-                logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">فشل استرجاع البيانات</td></tr>';
-                return;
-            }
-
-            document.getElementById('count').innerText = complaints.length;
-            logsBody.innerHTML = ''; // تفريغ الجدول تمهيداً لعرض النتائج
-
-            if (complaints.length === 0) {
-                logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">لا توجد بلاغات سابقة مسجلة برقم الهاتف هذا.</td></tr>';
-                return;
-            }
-
-            // تعبئة البيانات الواردة من السيرفر
+            logsBody.innerHTML = '';
             complaints.forEach(c => {
-                const row = `<tr>
-                    <td>${c.timestamp}</td>
-                    <td>${c.text}</td>
-                    <td><strong style="color: #2e7d32;">${c.category}</strong></td>
-                    <td>${c.confidence}</td>
-                </tr>`;
-                logsBody.innerHTML += row;
+                logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`;
             });
+            document.getElementById('count').innerText = complaints.length;
+        } catch (e) { logsBody.innerHTML = '<tr><td colspan="4">خطأ في جلب البيانات</td></tr>'; }
+    }
 
-        } catch (error) {
-            logsBody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: red;">حدث خطأ في الاتصال بقاعدة البيانات</td></tr>';
-        }
+    function exportToCSV() {
+        const rows = Array.from(document.querySelectorAll('#logsBody tr'));
+        let csvContent = "data:text/csv;charset=utf-8,التاريخ,التفاصيل,التصنيف,الثقة\n";
+        rows.forEach(row => {
+            const cols = Array.from(row.querySelectorAll('td')).map(td => td.innerText);
+            csvContent += cols.join(",") + "\n";
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "my_reports.csv");
+        document.body.appendChild(link);
+        link.click();
     }
 </script>
 </body>
