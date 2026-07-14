@@ -7,7 +7,40 @@
         :root { --bg: #f4f7f6; --card-bg: white; --text: #333; --nav: #2c3e50; }
         .dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #eee; --nav: #000; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; transition: 0.3s; }
-        .nav-bar { background: var(--nav); color: white; padding: 15px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 20px; align-items: center; }
+        
+        /* تنسيق الشريط الكحلي ليتوزع إلى 3 أقسام متساوية */
+        .nav-bar { 
+            background: var(--nav); 
+            color: white; 
+            padding: 10px 20px; 
+            border-radius: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 20px; 
+            align-items: center; 
+        }
+        .nav-bar > div {
+            flex: 1;
+        }
+        .nav-left-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+        }
+        
+        /* تنسيق وتوسيط الشعار داخل الشريط العلوي */
+        .nav-logo-container {
+            display: flex;
+            justify-content: center;
+        }
+        .nav-logo {
+            height: 45px;
+            width: auto;
+            background: white;
+            padding: 3px;
+            border-radius: 5px;
+        }
+        
         .page { display: none; background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .active { display: block; }
         input, textarea { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; background: var(--card-bg); color: var(--text); }
@@ -20,24 +53,35 @@
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        
-        /* تنسيق حاوية الشعار */
-        .logo-container {
-            text-align: center;
-            margin-bottom: 20px;
+
+        /* تنسيق قسم التقييم بالنجوم */
+        .rating-container {
+            margin: 15px 0;
         }
-        .logo-container img {
-            max-width: 180px;
-            height: auto;
-            border-radius: 10px;
+        .stars {
+            font-size: 28px;
+            cursor: pointer;
+            color: #ccc;
+            transition: color 0.2s;
+            margin: 0 2px;
         }
     </style>
 </head>
 <body>
 
 <div class="nav-bar">
-    <div>📊 <span data-i18n="reports_count">البلاغات المسترجعة</span>: <span id="count">0</span></div>
+    <!-- اليمين: عدد البلاغات -->
     <div>
+        📊 <span data-i18n="reports_count">البلاغات المسترجعة</span>: <span id="count">0</span>
+    </div>
+    
+    <!-- المنتصف: الشعار الموسط -->
+    <div class="nav-logo-container">
+        <img src="https://raw.githubusercontent.com/AmAnn90876/Classifier-7/main/templates/Screenshot%202026-07-14%20033020.png" alt="شعار بلدية ينبع" class="nav-logo">
+    </div>
+    
+    <!-- اليسار: أزرار التحكم والتنقل -->
+    <div class="nav-left-buttons">
         <button onclick="toggleDarkMode()">🌙/☀️</button>
         <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
         <button class="btn-stats" onclick="window.open('https://my-app-git3kwfxmxclxvajrjmgbp.streamlit.app/', '_blank')" data-i18n="nav_stats">الإحصائيات</button>
@@ -48,12 +92,8 @@
 </div>
 
 <div id="home" class="page active">
-    <!-- حاوية الشعار المضافة -->
-    <div class="logo-container">
-        <img src="https://raw.githubusercontent.com/AmAnn90876/Classifier-7/main/templates/Screenshot%202026-07-14%20033020.png" alt="شعار النظام">
-    </div>
-    <h1 data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
-    <p data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
+    <h1 style="text-align: center;" data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
+    <p style="text-align: center;" data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
 </div>
 
 <div id="report" class="page">
@@ -61,29 +101,26 @@
     <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
+    
     <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
     <input type="file" id="imageInput" accept="image/*">
+    
+    <!-- قسم تقييم الخدمة المدمج داخل صفحة تقديم بلاغ -->
+    <div class="rating-container">
+        <label style="display: block; margin-bottom: 5px; font-weight: bold;">تقييم الخدمة:</label>
+        <div id="ratingStars">
+            <span class="stars" onclick="setRating(1)">★</span>
+            <span class="stars" onclick="setRating(2)">★</span>
+            <span class="stars" onclick="setRating(3)">★</span>
+            <span class="stars" onclick="setRating(4)">★</span>
+            <span class="stars" onclick="setRating(5)">★</span>
+        </div>
+        <input type="hidden" id="ratingValue" value="0">
+    </div>
+
     <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
 </div>
-<label>تقييم الخدمة:</label>
-<div id="ratingStars">
-    <span class="stars" onclick="setRating(1)" style="font-size: 24px; cursor: pointer; color: #ccc;">★</span>
-    <span class="stars" onclick="setRating(2)" style="font-size: 24px; cursor: pointer; color: #ccc;">★</span>
-    <span class="stars" onclick="setRating(3)" style="font-size: 24px; cursor: pointer; color: #ccc;">★</span>
-    <span class="stars" onclick="setRating(4)" style="font-size: 24px; cursor: pointer; color: #ccc;">★</span>
-    <span class="stars" onclick="setRating(5)" style="font-size: 24px; cursor: pointer; color: #ccc;">★</span>
-</div>
-<input type="hidden" id="ratingValue" value="0">
 
-<script>
-    function setRating(val) {
-        document.getElementById('ratingValue').value = val;
-        const stars = document.querySelectorAll('.stars');
-        stars.forEach((star, index) => {
-            star.style.color = index < val ? '#f1c40f' : '#ccc';
-        });
-    }
-</script>
 <div id="logs" class="page">
     <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
     <div class="search-container">
@@ -126,17 +163,32 @@
         document.getElementById(pageId).classList.add('active');
     }
 
+    // دالة تغيير التقييم وتلوين النجوم
+    function setRating(val) {
+        document.getElementById('ratingValue').value = val;
+        const stars = document.querySelectorAll('.stars');
+        stars.forEach((star, index) => {
+            star.style.color = index < val ? '#f1c40f' : '#ccc';
+        });
+    }
+
     async function classifyAndSubmit() {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const text = document.getElementById('desc').value;
+        const rating = document.getElementById('ratingValue').value;
         if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
-        sendData(name, phone, text);
+        sendData(name, phone, text, rating);
     }
 
-    async function sendData(name, phone, text) {
+    async function sendData(name, phone, text, rating) {
         try {
-            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
+            // تم تضمين التقييم (rating) في حزمة البيانات المرسلة للخادم
+            const response = await fetch('/predict', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ complaint: text, name, phone, rating }) 
+            });
             const data = await response.json();
             alert("تم التصنيف بنجاح: " + data.category);
             document.getElementById('searchPhone').value = phone;
