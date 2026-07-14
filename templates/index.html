@@ -20,6 +20,10 @@
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* تنسيق النجوم */
+        .star-rating { cursor: pointer; font-size: 30px; color: #ccc; margin-bottom: 10px; direction: ltr; display: inline-block; }
+        .star { transition: 0.2s; }
+        .star.active, .star:hover, .star:hover ~ .star { color: #f1c40f; }
     </style>
 </head>
 <body>
@@ -29,7 +33,6 @@
     <div>
         <button onclick="toggleDarkMode()">🌙/☀️</button>
         <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
-        <!-- تم إزالة الإيموجي من زر الإحصائيات -->
         <button class="btn-stats" onclick="window.open('https://my-app-git3kwfxmxclxvajrjmgbp.streamlit.app/', '_blank')" data-i18n="nav_stats">الإحصائيات</button>
         <button onclick="showPage('home')" data-i18n="nav_home">الرئيسية</button>
         <button onclick="showPage('report')" data-i18n="nav_report">تقديم بلاغ</button>
@@ -47,7 +50,18 @@
     <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
-    <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
+    
+    <label>تقييم الخدمة:</label>
+    <div class="star-rating" id="starRating">
+        <span class="star" data-value="1">★</span>
+        <span class="star" data-value="2">★</span>
+        <span class="star" data-value="3">★</span>
+        <span class="star" data-value="4">★</span>
+        <span class="star" data-value="5">★</span>
+    </div>
+    <input type="hidden" id="ratingValue" value="0">
+    
+    <br><label data-i18n="label_img">إرفاق صورة (اختياري):</label>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
 </div>
@@ -79,6 +93,18 @@
     };
 
     let currentLang = 'ar';
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('ratingValue');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            const val = this.getAttribute('data-value');
+            ratingInput.value = val;
+            stars.forEach(s => s.classList.remove('active'));
+            for(let i=0; i<val; i++) stars[i].classList.add('active');
+        });
+    });
+
     function toggleLanguage() {
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
         document.getElementById('htmlTag').lang = currentLang;
@@ -98,13 +124,14 @@
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const text = document.getElementById('desc').value;
-        if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
-        sendData(name, phone, text);
+        const rating = document.getElementById('ratingValue').value;
+        if (!name || !phone || !text || rating === "0") { alert("يرجى تعبئة جميع البيانات وتحديد التقييم"); return; }
+        sendData(name, phone, text, rating);
     }
 
-    async function sendData(name, phone, text) {
+    async function sendData(name, phone, text, rating) {
         try {
-            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
+            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone, rating }) });
             const data = await response.json();
             alert("تم التصنيف بنجاح: " + data.category);
             document.getElementById('searchPhone').value = phone;
