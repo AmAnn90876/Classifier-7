@@ -85,6 +85,12 @@
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
     
+    
+    <label style="display:block; margin-top:10px;" data-i18n="label_img">إرفاق صورة (اختياري):</label>
+    <input type="file" id="imageInput" accept="image/*">
+    <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
+</div>
+    
     <label>تقييم الخدمة:</label>
     <div id="ratingStars">
         <span class="stars" onclick="setRating(1)">★</span>
@@ -94,12 +100,7 @@
         <span class="stars" onclick="setRating(5)">★</span>
     </div>
     <input type="hidden" id="ratingValue" value="0">
-
-    <label style="display:block; margin-top:10px;" data-i18n="label_img">إرفاق صورة (اختياري):</label>
-    <input type="file" id="imageInput" accept="image/*">
-    <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
-</div>
-
+    
 <div id="logs" class="page">
     <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
     <div class="search-container">
