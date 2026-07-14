@@ -3,8 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title data-i18n="title">نظام تصنيف البلاغات الذكي</title>
-    <!-- تم إضافة مكتبة الرسم البياني هنا -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --bg: #f4f7f6; --card-bg: white; --text: #333; --nav: #2c3e50; }
         .dark-mode { --bg: #1a1a1a; --card-bg: #2d2d2d; --text: #eee; --nav: #000; }
@@ -22,6 +20,8 @@
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        /* تصميم الدائرة */
+        .circle { width: 120px; height: 120px; border: 5px solid #e67e22; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 20px auto; font-size: 24px; font-weight: bold; color: #e67e22; }
     </style>
 </head>
 <body>
@@ -31,7 +31,7 @@
     <div>
         <button onclick="toggleDarkMode()">🌙/☀️</button>
         <button class="btn-lang" onclick="toggleLanguage()">EN/AR</button>
-        <button class="btn-stats" onclick="showPage('stats')" data-i18n="nav_stats">الإحصائيات</button>
+        <button class="btn-stats" onclick="window.open('https://my-app-git3kwfxmxclxvajrjmgbp.streamlit.app/', '_blank')" data-i18n="nav_stats">الإحصائيات</button>
         <button onclick="showPage('home')" data-i18n="nav_home">الرئيسية</button>
         <button onclick="showPage('report')" data-i18n="nav_report">تقديم بلاغ</button>
         <button onclick="showPage('logs')" data-i18n="nav_logs">السجلات</button>
@@ -40,7 +40,9 @@
 
 <div id="home" class="page active">
     <h1 data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
-    <p data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
+    <!-- الدائرة المضافة -->
+    <div class="circle" id="totalCircle">0</div>
+    <p style="text-align:center" data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
 </div>
 
 <div id="report" class="page">
@@ -73,30 +75,10 @@
     </table>
 </div>
 
-<div id="stats" class="page">
-    <h2 data-i18n="nav_stats">الإحصائيات</h2>
-    <div style="display: flex; gap: 15px; justify-content: center; margin-bottom: 20px;">
-        <div style="background: #3498db; color: white; padding: 20px; border-radius: 10px; width: 30%;">
-            <h4>اليوم</h4>
-            <h2 id="dailyStats">0</h2>
-        </div>
-        <div style="background: #2ecc71; color: white; padding: 20px; border-radius: 10px; width: 30%;">
-            <h4>الأسبوع</h4>
-            <h2 id="weeklyStats">0</h2>
-        </div>
-        <div style="background: #9b59b6; color: white; padding: 20px; border-radius: 10px; width: 30%;">
-            <h4>الشهر</h4>
-            <h2 id="monthlyStats">0</h2>
-        </div>
-    </div>
-    <canvas id="myChart"></canvas>
-</div>
-
 <script>
-    let myChart;
     const translations = {
-        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
-        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
+        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة" },
+        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence" }
     };
 
     let currentLang = 'ar';
@@ -113,26 +95,6 @@
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        if (pageId === 'stats') loadStats();
-    }
-
-    async function classifyAndSubmit() {
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const text = document.getElementById('desc').value;
-        if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
-        sendData(name, phone, text);
-    }
-
-    async function sendData(name, phone, text) {
-        try {
-            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
-            const data = await response.json();
-            alert("تم التصنيف بنجاح: " + data.category);
-            document.getElementById('searchPhone').value = phone;
-            showPage('logs');
-            loadUserComplaints();
-        } catch (e) { alert("خطأ في الاتصال بالسيرفر"); }
     }
 
     async function loadUserComplaints() {
@@ -146,39 +108,12 @@
                 logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`;
             });
             document.getElementById('count').innerText = complaints.length;
-        } catch (e) { logsBody.innerHTML = '<tr><td colspan="4">خطأ في جلب البيانات</td></tr>'; }
+            document.getElementById('totalCircle').innerText = complaints.length; // تحديث الدائرة
+        } catch (e) { console.log("خطأ في الجلب"); }
     }
 
-    function exportToCSV() {
-        let csvContent = "data:text/csv;charset=utf-8,التاريخ,التفاصيل,التصنيف,الثقة\n";
-        Array.from(document.querySelectorAll('#logsBody tr')).forEach(row => {
-            csvContent += Array.from(row.querySelectorAll('td')).map(td => td.innerText).join(",") + "\n";
-        });
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", "reports.csv");
-        document.body.appendChild(link);
-        link.click();
-    }
-
-    async function loadStats() {
-        try {
-            const response = await fetch('/api/stats-detailed');
-            const data = await response.json(); 
-            document.getElementById('dailyStats').innerText = data.daily;
-            document.getElementById('weeklyStats').innerText = data.weekly;
-            document.getElementById('monthlyStats').innerText = data.monthly;
-            const ctx = document.getElementById('myChart').getContext('2d');
-            if (myChart) myChart.destroy();
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['اليوم', 'الأسبوع', 'الشهر'],
-                    datasets: [{ label: 'عدد البلاغات', data: [data.daily, data.weekly, data.monthly], borderColor: '#e67e22', fill: true }]
-                }
-            });
-        } catch (e) { console.error("Error", e); }
-    }
+    // تشغيل عند التحميل لجلب العدد
+    window.onload = loadUserComplaints;
 </script>
 </body>
 </html>
