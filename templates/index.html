@@ -20,9 +20,11 @@
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        /* تصميم الدوائر الثلاث */
+        /* تصميم الدوائر */
         .stats-container { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
         .circle-stat { width: 100px; height: 100px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; text-align: center; }
+        /* نجوم التقييم */
+        .stars { font-size: 24px; cursor: pointer; color: #ccc; display: inline-block; }
     </style>
 </head>
 <body>
@@ -41,14 +43,11 @@
 
 <div id="home" class="page active">
     <h1 data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
-    
-    <!-- الدوائر الثلاث للإحصائيات -->
     <div class="stats-container">
         <div class="circle-stat" style="background: #3498db;"><span>اليومي</span><span id="dailyCount">0</span></div>
         <div class="circle-stat" style="background: #2ecc71;"><span>الأسبوعي</span><span id="weeklyCount">0</span></div>
         <div class="circle-stat" style="background: #9b59b6;"><span>الشهري</span><span id="monthlyCount">0</span></div>
     </div>
-
     <p style="text-align:center; margin-top: 30px;" data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
 </div>
 
@@ -57,7 +56,18 @@
     <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
-    <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
+    
+    <label>تقييم الخدمة:</label>
+    <div id="ratingStars">
+        <span class="stars" onclick="setRating(1)">★</span>
+        <span class="stars" onclick="setRating(2)">★</span>
+        <span class="stars" onclick="setRating(3)">★</span>
+        <span class="stars" onclick="setRating(4)">★</span>
+        <span class="stars" onclick="setRating(5)">★</span>
+    </div>
+    <input type="hidden" id="ratingValue" value="0">
+
+    <label style="display:block; margin-top:10px;" data-i18n="label_img">إرفاق صورة (اختياري):</label>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
 </div>
@@ -83,6 +93,14 @@
 </div>
 
 <script>
+    let currentRating = 0;
+    function setRating(val) {
+        currentRating = val;
+        document.getElementById('ratingValue').value = val;
+        const stars = document.querySelectorAll('.stars');
+        stars.forEach((s, i) => s.style.color = i < val ? '#f1c40f' : '#ccc');
+    }
+
     const translations = {
         ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات المسترجعة", home_title: "نظام تصنيف البلاغات الذكي", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات الخاصة بك", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ والوقت", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة" },
         en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date & Time", th_desc: "Details", th_cat: "Category", th_conf: "Confidence" }
@@ -98,7 +116,6 @@
     }
 
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
@@ -111,7 +128,7 @@
             document.getElementById('dailyCount').innerText = data.daily;
             document.getElementById('weeklyCount').innerText = data.weekly;
             document.getElementById('monthlyCount').innerText = data.monthly;
-        } catch (e) { console.log("جاري تحميل الإحصائيات..."); }
+        } catch (e) { console.log("تحميل الإحصائيات..."); }
     }
 
     window.onload = updateStats;
@@ -120,20 +137,21 @@
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const text = document.getElementById('desc').value;
+        const rating = document.getElementById('ratingValue').value;
         if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
-        sendData(name, phone, text);
+        sendData(name, phone, text, rating);
     }
 
-    async function sendData(name, phone, text) {
+    async function sendData(name, phone, text, rating) {
         try {
-            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
+            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone, rating }) });
             const data = await response.json();
-            alert("تم التصنيف بنجاح: " + data.category);
+            alert("تم التصنيف والتقييم بنجاح!");
             document.getElementById('searchPhone').value = phone;
             showPage('logs');
             loadUserComplaints();
             updateStats();
-        } catch (e) { alert("خطأ في الاتصال بالسيرفر"); }
+        } catch (e) { alert("خطأ في الاتصال"); }
     }
 
     async function loadUserComplaints() {
@@ -143,9 +161,7 @@
             const response = await fetch(`/api/complaints?phone=${phone}`);
             const complaints = await response.json();
             logsBody.innerHTML = '';
-            complaints.forEach(c => {
-                logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`;
-            });
+            complaints.forEach(c => logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`);
             document.getElementById('count').innerText = complaints.length;
         } catch (e) { logsBody.innerHTML = '<tr><td colspan="4">خطأ في جلب البيانات</td></tr>'; }
     }
