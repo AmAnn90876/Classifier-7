@@ -21,22 +21,19 @@
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
         
-        /* تصميم الدوائر الجديد */
-        .main-circle-stat { width: 150px; height: 150px; border: 8px solid #e67e22; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px auto; }
-        .cat-circle { width: 120px; height: 120px; border: 6px solid #ccc; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 20px auto; transition: 0.3s; }
-        .color-btns { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
-        .btn-cat { width: 40px; height: 40px; border-radius: 50%; border: none; cursor: pointer; }
-        
-        .stars { font-size: 24px; cursor: pointer; color: #ccc; display: inline-block; }
-        .logo-container { text-align: center; margin-bottom: 20px; }
-        .logo-container img { max-width: 150px; height: auto; }
+        /* تنسيق حاوية الشعار */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-container img {
+            max-width: 180px;
+            height: auto;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
-
-<div class="logo-container">
-    <img src="https://pbs.twimg.com/profile_images/1866920620300075009/80lUQMl6.jpg" alt="الشعار">
-</div>
 
 <div class="nav-bar">
     <div>📊 <span data-i18n="reports_count">البلاغات المسترجعة</span>: <span id="count">0</span></div>
@@ -51,32 +48,12 @@
 </div>
 
 <div id="home" class="page active">
-    <h1 data-i18n="home_title" style="text-align:center;">نظام تصنيف البلاغات الذكي</h1>
-    
-    <!-- الدائرة الرئيسية للوقت -->
-    <div style="text-align: center;">
-        <button onclick="updateMainStat('daily')">اليومي</button>
-        <button onclick="updateMainStat('weekly')">الأسبوعي</button>
-        <button onclick="updateMainStat('monthly')">الشهري</button>
-        <div class="main-circle-stat">
-            <span id="labelPeriod" style="font-weight:bold;">اليومي</span>
-            <span id="valTotal" style="font-size:30px; color:#e67e22; font-weight:bold;">0</span>
-        </div>
+    <!-- حاوية الشعار المضافة -->
+    <div class="logo-container">
+        <img src="https://raw.githubusercontent.com/AmAnn90876/Classifier-7/main/templates/Screenshot%202026-07-14%20033020.png" alt="شعار النظام">
     </div>
-
-    <hr>
-
-    <!-- الدائرة التفاعلية للأقسام -->
-    <h3 style="text-align:center;">إحصائيات الأقسام (اضغط اللون)</h3>
-    <div class="cat-circle" id="catCircleDisplay">
-        <span id="catName">اختر قسماً</span>
-        <span id="catValue" style="font-size:24px; font-weight:bold;">0</span>
-    </div>
-    <div class="color-btns">
-        <button class="btn-cat" style="background:#e74c3c" onclick="showCat('التقني', 45, '#e74c3c')"></button>
-        <button class="btn-cat" style="background:#3498db" onclick="showCat('المالي', 28, '#3498db')"></button>
-        <button class="btn-cat" style="background:#2ecc71" onclick="showCat('العام', 15, '#2ecc71')"></button>
-    </div>
+    <h1 data-i18n="home_title">نظام تصنيف البلاغات الذكي</h1>
+    <p data-i18n="home_desc">أرسل بلاغك ليقوم النظام بتصنيفه وحفظه في السجلات السحابية.</p>
 </div>
 
 <div id="report" class="page">
@@ -84,23 +61,11 @@
     <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
-    
-    
-    <label style="display:block; margin-top:10px;" data-i18n="label_img">إرفاق صورة (اختياري):</label>
+    <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
     <input type="file" id="imageInput" accept="image/*">
     <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
 </div>
-    
-    <label>تقييم الخدمة:</label>
-    <div id="ratingStars">
-        <span class="stars" onclick="setRating(1)">★</span>
-        <span class="stars" onclick="setRating(2)">★</span>
-        <span class="stars" onclick="setRating(3)">★</span>
-        <span class="stars" onclick="setRating(4)">★</span>
-        <span class="stars" onclick="setRating(5)">★</span>
-    </div>
-    <input type="hidden" id="ratingValue" value="0">
-    
+
 <div id="logs" class="page">
     <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
     <div class="search-container">
@@ -122,37 +87,22 @@
 </div>
 
 <script>
-    // --- الدوال المدمجة ---
-    function setRating(val) {
-        document.getElementById('ratingValue').value = val;
-        document.querySelectorAll('.stars').forEach((s, i) => s.style.color = i < val ? '#f1c40f' : '#ccc');
-    }
-
-    function updateMainStat(period) {
-        const stats = { daily: 10, weekly: 50, monthly: 200 };
-        document.getElementById('labelPeriod').innerText = period === 'daily' ? 'اليومي' : (period === 'weekly' ? 'الأسبوعي' : 'الشهري');
-        document.getElementById('valTotal').innerText = stats[period];
-    }
-
-    function showCat(name, val, color) {
-        const circle = document.getElementById('catCircleDisplay');
-        document.getElementById('catName').innerText = name;
-        document.getElementById('catValue').innerText = val;
-        circle.style.borderColor = color;
-        document.getElementById('catValue').style.color = color;
-    }
-
-    // --- بقية دوالك الأصلية (اللغة، البحث، الإرسال) ---
     const translations = {
-        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة" },
-        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image:", btn_submit: "Submit", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence" }
+        ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ", th_desc: "التفاصيل", th_cat: "التصنيف", th_conf: "الثقة", no_data: "لا توجد بلاغات." },
+        en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", th_conf: "Confidence", no_data: "No complaints found." }
     };
 
+    let currentLang = 'ar';
     function toggleLanguage() {
-        // ... (منطق اللغة الخاص بك)
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        document.getElementById('htmlTag').lang = currentLang;
+        document.getElementById('htmlTag').dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = translations[currentLang][el.dataset.i18n]);
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = translations[currentLang][el.dataset.i18nPlaceholder]);
     }
 
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
@@ -162,14 +112,46 @@
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
         const text = document.getElementById('desc').value;
-        const rating = document.getElementById('ratingValue').value;
         if (!name || !phone || !text) { alert("يرجى تعبئة البيانات"); return; }
-        // الإرسال للسيرفر
-        alert("تم الإرسال والتقييم بنجاح!");
-        showPage('logs');
+        sendData(name, phone, text);
     }
 
-    function exportToCSV() { /* منطق التصدير الخاص بك */ }
+    async function sendData(name, phone, text) {
+        try {
+            const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone }) });
+            const data = await response.json();
+            alert("تم التصنيف بنجاح: " + data.category);
+            document.getElementById('searchPhone').value = phone;
+            showPage('logs');
+            loadUserComplaints();
+        } catch (e) { alert("خطأ في الاتصال بالسيرفر"); }
+    }
+
+    async function loadUserComplaints() {
+        const phone = document.getElementById('searchPhone').value.trim();
+        const logsBody = document.getElementById('logsBody');
+        try {
+            const response = await fetch(`/api/complaints?phone=${phone}`);
+            const complaints = await response.json();
+            logsBody.innerHTML = '';
+            complaints.forEach(c => {
+                logsBody.innerHTML += `<tr><td>${c.timestamp}</td><td>${c.text}</td><td>${c.category}</td><td>${c.confidence}</td></tr>`;
+            });
+            document.getElementById('count').innerText = complaints.length;
+        } catch (e) { logsBody.innerHTML = '<tr><td colspan="4">خطأ في جلب البيانات</td></tr>'; }
+    }
+
+    function exportToCSV() {
+        let csvContent = "data:text/csv;charset=utf-8,التاريخ,التفاصيل,التصنيف,الثقة\n";
+        Array.from(document.querySelectorAll('#logsBody tr')).forEach(row => {
+            csvContent += Array.from(row.querySelectorAll('td')).map(td => td.innerText).join(",") + "\n";
+        });
+        const link = document.createElement("a");
+        link.setAttribute("href", encodeURI(csvContent));
+        link.setAttribute("download", "reports.csv");
+        document.body.appendChild(link);
+        link.click();
+    }
 </script>
 </body>
 </html>
