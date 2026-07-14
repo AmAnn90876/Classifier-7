@@ -21,7 +21,7 @@
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
         /* تنسيق النجوم */
-        .star-rating { cursor: pointer; font-size: 30px; color: #ccc; margin-bottom: 10px; direction: ltr; display: inline-block; }
+        .star-rating { cursor: pointer; font-size: 30px; color: #ccc; margin: 10px 0; direction: ltr; display: block; text-align: center; }
         .star { transition: 0.2s; }
         .star.active, .star:hover, .star:hover ~ .star { color: #f1c40f; }
     </style>
@@ -50,12 +50,12 @@
     <input type="text" id="name" placeholder="اسم مقدم البلاغ" data-i18n-placeholder="placeholder_name">
     <input type="tel" id="phone" placeholder="رقم الهاتف" data-i18n-placeholder="placeholder_phone">
     <textarea id="desc" placeholder="تفاصيل البلاغ..." data-i18n-placeholder="placeholder_desc"></textarea>
-
-    <br><label data-i18n="label_img">إرفاق صورة (اختياري):</label>
+    
+    <label data-i18n="label_img">إرفاق صورة (اختياري):</label>
     <input type="file" id="imageInput" accept="image/*">
-    <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
-</div>
-     <label>تقييم الخدمة:</label>
+    
+    <!-- النجوم هنا داخل المربع -->
+    <label>تقييم الخدمة:</label>
     <div class="star-rating" id="starRating">
         <span class="star" data-value="1">★</span>
         <span class="star" data-value="2">★</span>
@@ -65,6 +65,9 @@
     </div>
     <input type="hidden" id="ratingValue" value="0">
     
+    <button onclick="classifyAndSubmit()" data-i18n="btn_submit">إرسال وتصنيف</button>
+</div>
+
 <div id="logs" class="page">
     <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
     <div class="search-container">
