@@ -20,10 +20,12 @@
         th, td { border: 1px solid #555; padding: 12px; text-align: right; }
         th { background: #f8f9fa; color: #333; }
         .search-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        /* تنسيق النجوم */
-        .star-rating { cursor: pointer; font-size: 30px; color: #ccc; margin: 10px 0; direction: ltr; display: block; text-align: center; }
-        .star { transition: 0.2s; }
-        .star.active, .star:hover, .star:hover ~ .star { color: #f1c40f; }
+        
+        /* تم إصلاح تنسيق النجوم هنا */
+        .star-rating { cursor: pointer; font-size: 30px; color: #ccc; margin: 10px 0; display: inline-flex; flex-direction: row-reverse; justify-content: center; }
+        .star { transition: 0.2s; padding: 0 2px; }
+        .star.active, .star.active ~ .star { color: #f1c40f; }
+        .star:hover, .star:hover ~ .star { color: #f1c40f; }
     </style>
 </head>
 <body>
@@ -57,11 +59,11 @@
     <div class="rating-wrapper">
         <label>تقييم الخدمة:</label>
         <div class="star-rating" id="starRating">
-            <span class="star" data-value="1">★</span>
-            <span class="star" data-value="2">★</span>
-            <span class="star" data-value="3">★</span>
-            <span class="star" data-value="4">★</span>
             <span class="star" data-value="5">★</span>
+            <span class="star" data-value="4">★</span>
+            <span class="star" data-value="3">★</span>
+            <span class="star" data-value="2">★</span>
+            <span class="star" data-value="1">★</span>
         </div>
         <input type="hidden" id="ratingValue" value="0">
     </div>
@@ -69,6 +71,7 @@
 </div>
 
 <div id="logs" class="page">
+    <!-- بقية الكود كما هو تماماً -->
     <h2 data-i18n="logs_title">سجل البلاغات الخاصة بك</h2>
     <div class="search-container">
         <input type="tel" id="searchPhone" placeholder="رقم هاتفك" data-i18n-placeholder="placeholder_search">
@@ -88,24 +91,31 @@
 </div>
 
 <script>
+    // تم إصلاح المنطق البرمجي للنجوم هنا
+    const stars = document.querySelectorAll('.star');
+    const ratingInput = document.getElementById('ratingValue');
+
+    stars.forEach(star => {
+        star.addEventListener('click', function() {
+            ratingInput.value = this.getAttribute('data-value');
+            stars.forEach(s => s.classList.remove('active'));
+            this.classList.add('active');
+            // تفعيل النجوم التي تسبق النجمة المختارة في الترتيب العكسي
+            let sibling = this.nextElementSibling;
+            while (sibling) {
+                sibling.classList.add('active');
+                sibling = sibling.nextElementSibling;
+            }
+        });
+    });
+
+    // ... باقي السكريبت الخاص بك كما هو ...
     const translations = {
         ar: { title: "نظام تصنيف البلاغات الذكي", nav_home: "الرئيسية", nav_report: "تقديم بلاغ", nav_logs: "السجلات", nav_stats: "الإحصائيات", reports_count: "البلاغات", home_title: "نظام تصنيف البلاغات", home_desc: "أرسل بلاغك ليقوم النظام بتصنيفه.", rep_title: "تقديم بلاغ جديد", placeholder_name: "اسم مقدم البلاغ", placeholder_phone: "رقم الهاتف", placeholder_desc: "تفاصيل البلاغ...", label_img: "إرفاق صورة (اختياري):", btn_submit: "إرسال وتصنيف", logs_title: "سجل البلاغات", placeholder_search: "رقم هاتفك", btn_search: "عرض السجل", btn_export: "تصدير إلى CSV", th_date: "التاريخ والوقت", th_desc: "التفاصيل", th_cat: "التصنيف", no_data: "لا توجد بلاغات." },
         en: { title: "Smart Complaint System", nav_home: "Home", nav_report: "Report", nav_logs: "Logs", nav_stats: "Stats", reports_count: "Complaints", home_title: "Smart Complaint System", home_desc: "Submit your complaint for classification.", rep_title: "New Report", placeholder_name: "Your Name", placeholder_phone: "Phone Number", placeholder_desc: "Details...", label_img: "Attach image (optional):", btn_submit: "Submit & Classify", logs_title: "My Logs", placeholder_search: "Your Phone", btn_search: "Search", btn_export: "Export to CSV", th_date: "Date", th_desc: "Details", th_cat: "Category", no_data: "No complaints found." }
     };
 
     let currentLang = 'ar';
-    const stars = document.querySelectorAll('.star');
-    const ratingInput = document.getElementById('ratingValue');
-
-    stars.forEach(star => {
-        star.addEventListener('click', function() {
-            const val = this.getAttribute('data-value');
-            ratingInput.value = val;
-            stars.forEach(s => s.classList.remove('active'));
-            for(let i=0; i<val; i++) stars[i].classList.add('active');
-        });
-    });
-
     function toggleLanguage() {
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
         document.getElementById('htmlTag').lang = currentLang;
@@ -113,14 +123,11 @@
         document.querySelectorAll('[data-i18n]').forEach(el => el.innerText = translations[currentLang][el.dataset.i18n]);
         document.querySelectorAll('[data-i18n-placeholder]').forEach(el => el.placeholder = translations[currentLang][el.dataset.i18nPlaceholder]);
     }
-
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
-
     function showPage(pageId) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
     }
-
     async function classifyAndSubmit() {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
@@ -129,7 +136,6 @@
         if (!name || !phone || !text || rating === "0") { alert("يرجى تعبئة جميع البيانات وتحديد التقييم"); return; }
         sendData(name, phone, text, rating);
     }
-
     async function sendData(name, phone, text, rating) {
         try {
             const response = await fetch('/predict', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ complaint: text, name, phone, rating }) });
@@ -140,7 +146,6 @@
             loadUserComplaints();
         } catch (e) { alert("خطأ في الاتصال بالسيرفر"); }
     }
-
     async function loadUserComplaints() {
         const phone = document.getElementById('searchPhone').value.trim();
         const logsBody = document.getElementById('logsBody');
@@ -154,7 +159,6 @@
             document.getElementById('count').innerText = complaints.length;
         } catch (e) { logsBody.innerHTML = '<tr><td colspan="3">خطأ في جلب البيانات</td></tr>'; }
     }
-
     function exportToCSV() {
         let csvContent = "data:text/csv;charset=utf-8,التاريخ,التفاصيل,التصنيف\n";
         Array.from(document.querySelectorAll('#logsBody tr')).forEach(row => {
